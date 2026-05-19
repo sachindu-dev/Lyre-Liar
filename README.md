@@ -100,12 +100,12 @@ project-werewolf/
 │   ├── main_menu.gd             # Mode select → map select → host/join
 │   ├── mobile_controls.gd       # Touch joystick + jump button
 │   ├── responsive_ui.gd         # Autoload — viewport-based scaling
-│   ├── level_1.gd … level_4.gd  # Per-map tile world builders
-│   └── bake_level3.gd / bake_level4.gd  # One-shot scene baking helpers
+│   ├── level_1.gd, level_2.gd, level_4.gd  # Per-map level scripts
+│   └── bake_level4.gd              # One-shot scene baking helper
 ├── scenes/
 │   ├── main.tscn, main_menu.tscn
 │   ├── player.tscn, mobile_controls.tscn
-│   └── level_1.tscn … level_4.tscn
+│   └── level_1.tscn, level_2.tscn, level_4.tscn
 ├── addons/
 │   ├── colyseus/           # Pure-GDScript Colyseus client SDK
 │   └── godot_mcp/          # Editor-side MCP tooling
