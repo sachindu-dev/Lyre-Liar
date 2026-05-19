@@ -1,3 +1,4 @@
+@tool
 extends Node2D
 
 ## Level scene. Terrain, spawn points, and camera bounds come from the scene,
@@ -8,8 +9,42 @@ extends Node2D
 
 var _spawn_index := 0
 
+# Platform ranges defined in tile coordinates (row/col in TileMap space).
+# Tiles alternate between atlas coords (14,23)/(15,23) for top rows and
+# (14,24)/(15,24) for bottom rows, matching the mainlev_build.png source.
+const PLATFORMS := [
+	{"rs": 8, "re": 9, "cs": 76,  "ce": 110},  # Extended floor
+	{"rs": 6, "re": 7, "cs": 5,   "ce": 14},   # Low platform 1
+	{"rs": 6, "re": 7, "cs": 22,  "ce": 31},   # Low platform 2
+	{"rs": 6, "re": 7, "cs": 42,  "ce": 51},   # Low platform 3
+	{"rs": 6, "re": 7, "cs": 62,  "ce": 71},   # Low platform 4
+	{"rs": 6, "re": 7, "cs": 84,  "ce": 93},   # Low platform 5
+	{"rs": 4, "re": 5, "cs": 14,  "ce": 21},   # High platform 1
+	{"rs": 4, "re": 5, "cs": 32,  "ce": 39},   # High platform 2
+	{"rs": 4, "re": 5, "cs": 52,  "ce": 59},   # High platform 3
+	{"rs": 4, "re": 5, "cs": 72,  "ce": 79},   # High platform 4
+]
+
+
+func _create_platform_tiles() -> void:
+	var tilemap := get_node_or_null("TileMap") as TileMap
+	if tilemap == null:
+		return
+	for p in PLATFORMS:
+		for row in range(p.rs, p.re + 1):
+			for col in range(p.cs, p.ce + 1):
+				var coords := Vector2i(col, row)
+				var atlas := Vector2i(14 + col % 2, 23 + row % 2)
+				if tilemap.get_cell_source_id(0, coords) != 1 \
+						or tilemap.get_cell_atlas_coords(0, coords) != atlas:
+					tilemap.set_cell(0, coords, 1, atlas)
+
 
 func _ready() -> void:
+	_create_platform_tiles()
+	if Engine.is_editor_hint():
+		return
+
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
 	MultiplayerManager.connection_failed.connect(_on_connection_failed)
