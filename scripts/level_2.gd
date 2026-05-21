@@ -9,36 +9,8 @@ extends Node2D
 var _spawn_index := 0
 var _death_menu: CanvasLayer = null
 
-# Elevated platforms generated at runtime on top of the base floor tiles.
-# Base floor sits at rows 6–7 (world y ≈ 443–467).
-# Mid platforms (rows 3–4) are reachable in one jump (~73 px max height).
-# High platforms (rows 1–2) are reachable from mid platforms.
-const PLATFORMS := [
-	{"rs": 3, "re": 4, "cs": 10, "ce": 22},
-	{"rs": 3, "re": 4, "cs": 35, "ce": 47},
-	{"rs": 3, "re": 4, "cs": 60, "ce": 72},
-	{"rs": 1, "re": 2, "cs": 22, "ce": 34},
-	{"rs": 1, "re": 2, "cs": 48, "ce": 60},
-]
-
-
-func _create_platform_tiles() -> void:
-	var tilemap := get_node_or_null("TileMap") as TileMap
-	if tilemap == null:
-		return
-	for p in PLATFORMS:
-		for row in range(p.rs, p.re + 1):
-			for col in range(p.cs, p.ce + 1):
-				var coords := Vector2i(col, row)
-				var atlas := Vector2i(14 + col % 2, 23 + row % 2)
-				if tilemap.get_cell_source_id(0, coords) != 1 \
-						or tilemap.get_cell_atlas_coords(0, coords) != atlas:
-					tilemap.set_cell(0, coords, 1, atlas)
-
 
 func _ready() -> void:
-	_create_platform_tiles()
-
 	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
 	_death_menu = preload("res://scenes/death_menu.tscn").instantiate()
 	add_child(_death_menu)
