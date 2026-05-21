@@ -1,7 +1,6 @@
 extends Node2D
 
 const GOAL_POSITION := Vector2(560, 200)
-const GOAL_SIZE := Vector2(96, 64)
 
 var _spawn_points := [
 	Vector2(50, 152), Vector2(100, 152), Vector2(200, 152), Vector2(300, 152),
@@ -11,6 +10,8 @@ var _spawn_index := 0
 var _death_menu: CanvasLayer = null
 var _level_complete_menu: CanvasLayer = null
 var _timer_hud: CanvasLayer = null
+var _run_time: float = 0.0
+var _deaths: int = 0
 
 func _ready() -> void:
 	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
@@ -65,22 +66,22 @@ func _remove_player(id: String) -> void:
 	if has_node(id):
 		get_node(id).queue_free()
 
+func _process(delta: float) -> void:
+	if MultiplayerManager.is_single_player:
+		_run_time += delta
+
+
 func _on_kill_zone_body_entered(body: Node2D) -> void:
 	if not body.has_method("respawn"):
 		return
 	if "is_local_player" in body and body.is_local_player:
+		_deaths += 1
 		_death_menu.show_death(body)
 
 
 func _add_goal_zone() -> void:
-	var goal := Area2D.new()
-	goal.name = "GoalZone"
+	var goal := preload("res://scenes/goal_zone.tscn").instantiate()
 	goal.position = GOAL_POSITION
-	var shape := CollisionShape2D.new()
-	var rect := RectangleShape2D.new()
-	rect.size = GOAL_SIZE
-	shape.shape = rect
-	goal.add_child(shape)
 	goal.body_entered.connect(_on_goal_body_entered)
 	add_child(goal)
 
@@ -91,7 +92,7 @@ func _on_goal_body_entered(body: Node2D) -> void:
 	if "is_local_player" in body and body.is_local_player:
 		if _timer_hud and _timer_hud.has_method("stop"):
 			_timer_hud.stop()
-		_level_complete_menu.show_win(body)
+		_level_complete_menu.show_win(body, _run_time, _deaths)
 
 func _display_room_code(custom_code: String = "") -> void:
 	var room_code := custom_code
