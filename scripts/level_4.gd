@@ -5,9 +5,12 @@ var _spawn_points := [
 	Vector2(400, 152), Vector2(500, 152), Vector2(600, 152), Vector2(700, 152),
 ]
 var _spawn_index := 0
+var _death_menu: CanvasLayer = null
 
 func _ready() -> void:
 	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
+	_death_menu = preload("res://scenes/death_menu.tscn").instantiate()
+	add_child(_death_menu)
 
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
@@ -52,8 +55,10 @@ func _remove_player(id: String) -> void:
 		get_node(id).queue_free()
 
 func _on_kill_zone_body_entered(body: Node2D) -> void:
-	if body.has_method("respawn"):
-		body.respawn()
+	if not body.has_method("respawn"):
+		return
+	if "is_local_player" in body and body.is_local_player:
+		_death_menu.show_death(body)
 
 func _display_room_code(custom_code: String = "") -> void:
 	var room_code := custom_code

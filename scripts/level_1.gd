@@ -7,6 +7,7 @@ extends Node2D
 @export var world_size: Vector2 = Vector2(2048, 2048)
 
 var _spawn_index := 0
+var _death_menu: CanvasLayer = null
 
 # Elevated platforms generated at runtime on top of the base floor tiles.
 # Base floor sits at rows 6–7 (world y ≈ 443–467).
@@ -39,6 +40,8 @@ func _ready() -> void:
 	_create_platform_tiles()
 
 	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
+	_death_menu = preload("res://scenes/death_menu.tscn").instantiate()
+	add_child(_death_menu)
 
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
@@ -118,8 +121,10 @@ func _spawn_positions() -> Array[Vector2]:
 
 
 func _on_kill_zone_body_entered(body: Node2D) -> void:
-	if body.has_method("respawn"):
-		body.respawn()
+	if not body.has_method("respawn"):
+		return
+	if "is_local_player" in body and body.is_local_player:
+		_death_menu.show_death(body)
 
 
 func _display_room_code(custom_code: String = "") -> void:
