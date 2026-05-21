@@ -12,6 +12,7 @@ const GOAL_SIZE := Vector2(64, 96)
 var _spawn_index := 0
 var _death_menu: CanvasLayer = null
 var _level_complete_menu: CanvasLayer = null
+var _timer_hud: CanvasLayer = null
 
 
 func _ready() -> void:
@@ -20,6 +21,8 @@ func _ready() -> void:
 	add_child(_death_menu)
 	_level_complete_menu = preload("res://scenes/level_complete_menu.tscn").instantiate()
 	add_child(_level_complete_menu)
+	_timer_hud = preload("res://scenes/timer_hud.tscn").instantiate()
+	add_child(_timer_hud)
 
 	_add_goal_zone()
 
@@ -124,6 +127,8 @@ func _on_goal_body_entered(body: Node2D) -> void:
 	if _level_complete_menu == null:
 		return
 	if "is_local_player" in body and body.is_local_player:
+		if _timer_hud and _timer_hud.has_method("stop"):
+			_timer_hud.stop()
 		_level_complete_menu.show_win(body)
 
 
