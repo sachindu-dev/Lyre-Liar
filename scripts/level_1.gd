@@ -6,14 +6,22 @@ extends Node2D
 
 @export var world_size: Vector2 = Vector2(2048, 2048)
 
+const GOAL_POSITION := Vector2(1900, 700)
+const GOAL_SIZE := Vector2(64, 96)
+
 var _spawn_index := 0
 var _death_menu: CanvasLayer = null
+var _level_complete_menu: CanvasLayer = null
 
 
 func _ready() -> void:
 	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
 	_death_menu = preload("res://scenes/death_menu.tscn").instantiate()
 	add_child(_death_menu)
+	_level_complete_menu = preload("res://scenes/level_complete_menu.tscn").instantiate()
+	add_child(_level_complete_menu)
+
+	_add_goal_zone()
 
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
@@ -97,6 +105,26 @@ func _on_kill_zone_body_entered(body: Node2D) -> void:
 		return
 	if "is_local_player" in body and body.is_local_player:
 		_death_menu.show_death(body)
+
+
+func _add_goal_zone() -> void:
+	var goal := Area2D.new()
+	goal.name = "GoalZone"
+	goal.position = GOAL_POSITION
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = GOAL_SIZE
+	shape.shape = rect
+	goal.add_child(shape)
+	goal.body_entered.connect(_on_goal_body_entered)
+	add_child(goal)
+
+
+func _on_goal_body_entered(body: Node2D) -> void:
+	if _level_complete_menu == null:
+		return
+	if "is_local_player" in body and body.is_local_player:
+		_level_complete_menu.show_win(body)
 
 
 func _display_room_code(custom_code: String = "") -> void:
