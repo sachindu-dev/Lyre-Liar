@@ -7,6 +7,8 @@ var _spawn_points := [
 var _spawn_index := 0
 
 func _ready() -> void:
+	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
+
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
 	MultiplayerManager.connection_failed.connect(_on_connection_failed)

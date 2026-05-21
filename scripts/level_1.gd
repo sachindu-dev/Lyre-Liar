@@ -38,6 +38,8 @@ func _create_platform_tiles() -> void:
 func _ready() -> void:
 	_create_platform_tiles()
 
+	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
+
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
 	MultiplayerManager.connection_failed.connect(_on_connection_failed)
