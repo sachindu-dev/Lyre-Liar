@@ -1,66 +1,30 @@
 extends Node2D
 
-## Day map — a sunny outdoor platformer built procedurally from the existing
-## res://asset/terrain/generated/ tiles. Replaces the prior JSON loader that
-## relied on the (removed) Sunny-land-woods asset pack.
+## Level scene. Terrain, spawn points, and camera bounds come from the scene,
+## not from this script — paint geometry (e.g. with a TileMapLayer) in the
+## editor and add Marker2D children under a `SpawnPoints` node for spawns.
 
-# ─── Tile types ───────────────────────────────────────────────────────────────
-const EMPTY := 0
-const GRASS := 1   # grass_surface — used for ground top
-const DIRT  := 2   # dirt_body    — used under grass
-const STONE := 3   # stone_surface — floating platforms
-const ROCK  := 4   # stone_body   — solid stone (decoration / bottom layer)
+@export var world_size: Vector2 = Vector2(3840, 1536)
 
-const TILE_SIZE := 128
-
-# 30 columns × 12 rows = 3840 × 1536 px world.
-# 0=sky, 1=grass top, 2=dirt body, 3=stone surface platform, 4=stone body
-const LEVEL: Array = [
-	[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,3,3,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,3,3,3,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,3,3, 3,0,0,0,0,0,0,0,3,3, 0,0,0,0,0,0,0,0,0,0],
-	[0,0,3,3,0,0,0,0,0,0, 0,0,0,3,3,3,0,0,0,0, 0,0,0,0,0,0,3,3,0,0],
-	[1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1],
-	[2,2,2,2,2,2,2,2,2,2, 2,2,2,2,2,2,2,2,2,2, 2,2,2,2,2,2,2,2,2,2],
-	[2,2,2,2,2,2,2,2,2,2, 2,2,2,2,2,2,2,2,2,2, 2,2,2,2,2,2,2,2,2,2],
-]
-
-# ─── Textures ─────────────────────────────────────────────────────────────────
-const TEX_BASE := "res://asset/terrain/generated/"
-const TEX_PATHS := {
-	GRASS: TEX_BASE + "grass_surface.png",
-	DIRT:  TEX_BASE + "dirt_body.png",
-	STONE: TEX_BASE + "stone_surface.png",
-	ROCK:  TEX_BASE + "stone_body.png",
-}
-const MODULATE := {
-	GRASS: Color(1.00, 1.00, 1.00, 1),
-	DIRT:  Color(0.95, 0.85, 0.65, 1),
-	STONE: Color(1.00, 1.00, 1.00, 1),
-	ROCK:  Color(0.85, 0.85, 0.85, 1),
-}
-
-var _tex: Dictionary = {}
-var _spawn_points := [
-	Vector2(256, 900),  Vector2(640, 900),  Vector2(1024, 900),
-	Vector2(1408, 900), Vector2(1792, 900), Vector2(2176, 900),
-	Vector2(2560, 900), Vector2(3072, 900),
-]
 var _spawn_index := 0
+var _death_menu: CanvasLayer = null
+var _level_complete_menu: CanvasLayer = null
+var _timer_hud: CanvasLayer = null
+var _run_time: float = 0.0
+var _deaths: int = 0
 
 
 func _ready() -> void:
-	for tile_type in TEX_PATHS:
-		_tex[tile_type] = load(TEX_PATHS[tile_type])
+	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
+	_death_menu = preload("res://scenes/death_menu.tscn").instantiate()
+	add_child(_death_menu)
+	_level_complete_menu = preload("res://scenes/level_complete_menu.tscn").instantiate()
+	add_child(_level_complete_menu)
+	_timer_hud = preload("res://scenes/timer_hud.tscn").instantiate()
+	add_child(_timer_hud)
 
+	$GoalZone.body_entered.connect(_on_goal_body_entered)
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
-
-	_build_level()
 
 	MultiplayerManager.connection_failed.connect(_on_connection_failed)
 	MultiplayerManager.player_connected.connect(_add_player)
@@ -86,50 +50,6 @@ func _on_connection_failed(_reason: String) -> void:
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 
-# ─── Level builder ────────────────────────────────────────────────────────────
-func _build_level() -> void:
-	var width := LEVEL[0].size()
-	_spawn_wall(-20, LEVEL.size() * TILE_SIZE)
-	_spawn_wall(width * TILE_SIZE + 20, LEVEL.size() * TILE_SIZE)
-
-	for row in LEVEL.size():
-		for col in LEVEL[row].size():
-			var tile_type: int = LEVEL[row][col]
-			if tile_type == EMPTY:
-				continue
-			_spawn_tile(col, row, tile_type)
-
-
-func _spawn_tile(col: int, row: int, tile_type: int) -> void:
-	var body := StaticBody2D.new()
-	body.position = Vector2(col * TILE_SIZE + TILE_SIZE * 0.5,
-							row * TILE_SIZE + TILE_SIZE * 0.5)
-
-	var sprite := Sprite2D.new()
-	sprite.texture = _tex[tile_type]
-	sprite.modulate = MODULATE.get(tile_type, Color.WHITE)
-	body.add_child(sprite)
-
-	var col_shape := CollisionShape2D.new()
-	var rect := RectangleShape2D.new()
-	rect.size = Vector2(TILE_SIZE, TILE_SIZE)
-	col_shape.shape = rect
-	body.add_child(col_shape)
-
-	add_child(body)
-
-
-func _spawn_wall(x_pos: float, height: float) -> void:
-	var body := StaticBody2D.new()
-	body.position = Vector2(x_pos, height * 0.5)
-	var col_shape := CollisionShape2D.new()
-	var rect := RectangleShape2D.new()
-	rect.size = Vector2(40, height)
-	col_shape.shape = rect
-	body.add_child(col_shape)
-	add_child(body)
-
-
 # ─── Players ──────────────────────────────────────────────────────────────────
 func _add_player(id: String) -> void:
 	if has_node(id):
@@ -137,7 +57,7 @@ func _add_player(id: String) -> void:
 	var player = preload("res://scenes/player.tscn").instantiate()
 	player.session_id = id
 	player.name = id
-	player.position = _spawn_points[_spawn_index % _spawn_points.size()]
+	player.position = _next_spawn_position()
 	_spawn_index += 1
 	add_child(player)
 
@@ -145,8 +65,8 @@ func _add_player(id: String) -> void:
 		var cam: Camera2D = player.get_node("Camera2D")
 		cam.limit_left = 0
 		cam.limit_top = 0
-		cam.limit_right = LEVEL[0].size() * TILE_SIZE
-		cam.limit_bottom = LEVEL.size() * TILE_SIZE
+		cam.limit_right = int(world_size.x)
+		cam.limit_bottom = int(world_size.y)
 
 
 func _remove_player(id: String) -> void:
@@ -154,9 +74,45 @@ func _remove_player(id: String) -> void:
 		get_node(id).queue_free()
 
 
+func _next_spawn_position() -> Vector2:
+	var positions := _spawn_positions()
+	if positions.is_empty():
+		push_warning("Level2: no Marker2D children under 'SpawnPoints'; spawning at (0, 0)")
+		return Vector2.ZERO
+	return positions[_spawn_index % positions.size()]
+
+
+func _spawn_positions() -> Array[Vector2]:
+	var positions: Array[Vector2] = []
+	var holder := get_node_or_null("SpawnPoints")
+	if holder == null:
+		return positions
+	for child in holder.get_children():
+		if child is Node2D:
+			positions.append((child as Node2D).position)
+	return positions
+
+
+func _process(delta: float) -> void:
+	if MultiplayerManager.is_single_player:
+		_run_time += delta
+
+
 func _on_kill_zone_body_entered(body: Node2D) -> void:
-	if body.has_method("respawn"):
-		body.respawn()
+	if not body.has_method("respawn"):
+		return
+	if "is_local_player" in body and body.is_local_player:
+		_deaths += 1
+		_death_menu.show_death(body)
+
+
+func _on_goal_body_entered(body: Node2D) -> void:
+	if _level_complete_menu == null:
+		return
+	if "is_local_player" in body and body.is_local_player:
+		if _timer_hud and _timer_hud.has_method("stop"):
+			_timer_hud.stop()
+		_level_complete_menu.show_win(body, _run_time, _deaths)
 
 
 # ─── HUD ──────────────────────────────────────────────────────────────────────
