@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://cxm82d2p8ltj0" path="res://Assets/World/PixelFantasy_Caves_1/background3.png" id="16_cave3"]
 [ext_resource type="Texture2D" uid="uid://jolhuooitm6s" path="res://Assets/World/PixelFantasy_Caves_1/props1.png" id="20_s0ibv"]
 [ext_resource type="Texture2D" uid="uid://btait6wffvy68" path="res://Assets/World/PixelFantasy_Caves_1/props2.png" id="21_kqmrt"]
+[ext_resource type="PackedScene" path="res://scenes/goal_zone.tscn" id="22_goal"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_s0ibv"]
 
@@ -6009,6 +6010,9 @@ position = Vector2(1280, 3900)
 
 [node name="KillShape" type="CollisionShape2D" parent="KillZone" unique_id=1347778482]
 shape = SubResource("KillZoneShape")
+
+[node name="GoalZone" parent="." instance=ExtResource("22_goal")]
+position = Vector2(560, 200)
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=693801169]
 stream = ExtResource("4_gmwgb")

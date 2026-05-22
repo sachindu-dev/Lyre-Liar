@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://12foa3wesyyn" path="res://Assets/World/Assets/tileset.png" id="3_5xbjy"]
 [ext_resource type="Texture2D" uid="uid://cnxqvx4jo43n4" path="res://Assets/World/PixelFantasy_Caves_1/mainlev_build.png" id="4_4nkto"]
 [ext_resource type="PackedScene" uid="uid://ql5s5dasaxm6" path="res://scenes/mobile_controls.tscn" id="4_mobile"]
+[ext_resource type="PackedScene" path="res://scenes/goal_zone.tscn" id="5_goal"]
 
 [sub_resource type="RectangleShape2D" id="KillZoneShape"]
 size = Vector2(7680, 116)
@@ -1244,6 +1245,9 @@ position = Vector2(1024, 2150)
 
 [node name="KillShape" type="CollisionShape2D" parent="KillZone" unique_id=1755923894]
 shape = SubResource("KillZoneShape")
+
+[node name="GoalZone" parent="." unique_id=73052504 instance=ExtResource("5_goal")]
+position = Vector2(1298, 423)
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1239611333]
 _spawnable_scenes = PackedStringArray("uid://c8n6u4h7y7n2r")

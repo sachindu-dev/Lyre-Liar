@@ -6,8 +6,6 @@ extends Node2D
 
 @export var world_size: Vector2 = Vector2(3840, 1536)
 
-const GOAL_POSITION := Vector2(3700, 700)
-
 var _spawn_index := 0
 var _death_menu: CanvasLayer = null
 var _level_complete_menu: CanvasLayer = null
@@ -25,8 +23,7 @@ func _ready() -> void:
 	_timer_hud = preload("res://scenes/timer_hud.tscn").instantiate()
 	add_child(_timer_hud)
 
-	_add_goal_zone()
-
+	$GoalZone.body_entered.connect(_on_goal_body_entered)
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
 	MultiplayerManager.connection_failed.connect(_on_connection_failed)
@@ -107,13 +104,6 @@ func _on_kill_zone_body_entered(body: Node2D) -> void:
 	if "is_local_player" in body and body.is_local_player:
 		_deaths += 1
 		_death_menu.show_death(body)
-
-
-func _add_goal_zone() -> void:
-	var goal := preload("res://scenes/goal_zone.tscn").instantiate()
-	goal.position = GOAL_POSITION
-	goal.body_entered.connect(_on_goal_body_entered)
-	add_child(goal)
 
 
 func _on_goal_body_entered(body: Node2D) -> void:
