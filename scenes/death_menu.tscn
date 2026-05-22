@@ -24,7 +24,7 @@ offset_top = -110.0
 offset_right = 120.0
 offset_bottom = 110.0
 alignment = 1
-theme_override_constants/separation = 18
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="Overlay/Panel"]
 layout_mode = 2

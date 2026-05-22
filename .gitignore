@@ -11,6 +11,7 @@ export_credentials.cfg
 *.exe
 *.zip
 builds/
+build/
 
 # Node.js (Signaling Server)
 node_modules/

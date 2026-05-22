@@ -1,16 +1,35 @@
 extends CharacterBody2D
 
-const TEX_IDLE := preload("res://Assets/PinkMonster/Pink_Monster_Idle_4.png")
-const TEX_WALK := preload("res://Assets/PinkMonster/Pink_Monster_Walk_6.png")
-const TEX_JUMP := preload("res://Assets/PinkMonster/Pink_Monster_Jump_8.png")
+# Pink Monster has full Idle / Walk / Jump sheets.
+const PINK_IDLE := preload("res://Assets/PinkMonster/Pink_Monster_Idle_4.png")
+const PINK_WALK := preload("res://Assets/PinkMonster/Pink_Monster_Walk_6.png")
+const PINK_JUMP := preload("res://Assets/PinkMonster/Pink_Monster_Jump_8.png")
+
+# Dude / Owlet ship idle only; walk and jump reuse the idle sheet (frozen idle while moving).
+const DUDE_IDLE := preload("res://Assets/DudeMonster/Dude_Monster_Idle_4.png")
+const OWLET_IDLE := preload("res://Assets/OwletMonster/Owlet_Monster_Idle_4.png")
 
 enum AnimState { IDLE, WALK, JUMP }
 
-const ANIM_DATA := {
-	AnimState.IDLE: [TEX_IDLE, 4,  6.0],
-	AnimState.WALK: [TEX_WALK, 6,  8.0],
-	AnimState.JUMP: [TEX_JUMP, 8, 10.0],
+const ANIM_BY_CHARACTER := {
+	"pink": {
+		AnimState.IDLE: [PINK_IDLE, 4,  6.0],
+		AnimState.WALK: [PINK_WALK, 6,  8.0],
+		AnimState.JUMP: [PINK_JUMP, 8, 10.0],
+	},
+	"dude": {
+		AnimState.IDLE: [DUDE_IDLE, 4, 6.0],
+		AnimState.WALK: [DUDE_IDLE, 4, 6.0],
+		AnimState.JUMP: [DUDE_IDLE, 4, 6.0],
+	},
+	"owlet": {
+		AnimState.IDLE: [OWLET_IDLE, 4, 6.0],
+		AnimState.WALK: [OWLET_IDLE, 4, 6.0],
+		AnimState.JUMP: [OWLET_IDLE, 4, 6.0],
+	},
 }
+
+var _anim_data: Dictionary = ANIM_BY_CHARACTER["pink"]
 
 const SPEED         := 220.0
 const JUMP_VELOCITY := -380.0
@@ -44,6 +63,16 @@ var _remote_initialized := false
 
 func _ready() -> void:
 	spawn_point = global_position
+
+	var character: String = MultiplayerManager.selected_character
+	if not ANIM_BY_CHARACTER.has(character):
+		character = "pink"
+	_anim_data = ANIM_BY_CHARACTER[character]
+
+	var initial: Array = _anim_data[AnimState.IDLE]
+	_sprite.texture = initial[0]
+	_sprite.hframes = initial[1]
+	_sprite.frame = 0
 
 	# Determine if this is the local player
 	if session_id == MultiplayerManager.session_id:
@@ -127,11 +156,11 @@ func _update_sprite(direction: float, vel_y: float, delta: float) -> void:
 		_anim_state   = intended
 		_walk_timer   = 0.0
 		_sprite.frame = 0
-		var anim_data: Array = ANIM_DATA[_anim_state]
+		var anim_data: Array = _anim_data[_anim_state]
 		_sprite.texture = anim_data[0]
 		_sprite.hframes = anim_data[1]
 
-	var data: Array      = ANIM_DATA[_anim_state]
+	var data: Array      = _anim_data[_anim_state]
 	var frame_count: int = data[1]
 	var fps: float       = data[2]
 

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/timer_hud.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/VT323-Regular.ttf" id="2_vt323"]
 
 [node name="TimerHud" type="CanvasLayer"]
 layer = 103
@@ -20,6 +21,7 @@ theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_vt323")
 
 [node name="Overlay" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -39,7 +41,7 @@ offset_top = -110.0
 offset_right = 120.0
 offset_bottom = 110.0
 alignment = 1
-theme_override_constants/separation = 18
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="Overlay/Panel"]
 layout_mode = 2

@@ -4,13 +4,6 @@ extends CanvasLayer
 ## Area2D. Pauses the tree while open. Single-player only — self-removes in
 ## multiplayer (mirrors timer_hud's pattern).
 
-const NEXT_MODE := {"day": "night", "night": "forest", "forest": "day"}
-const SCENE_FOR_MODE := {
-	"day":    "res://scenes/level_2.tscn",
-	"night":  "res://scenes/level_1.tscn",
-	"forest": "res://scenes/level_4.tscn",
-}
-
 var _won: bool = false
 
 @onready var _overlay: ColorRect = $Overlay
@@ -56,10 +49,9 @@ func _replay() -> void:
 
 func _next_level() -> void:
 	get_tree().paused = false
-	var current: String = MultiplayerManager.selected_mode
-	var next: String = NEXT_MODE.get(current, "day")
+	var next: String = MultiplayerManager.next_mode(MultiplayerManager.selected_mode)
 	MultiplayerManager.selected_mode = next
-	get_tree().change_scene_to_file(SCENE_FOR_MODE[next])
+	get_tree().change_scene_to_file(MultiplayerManager.get_map(next)["scene"])
 
 
 func _to_main_menu() -> void:
