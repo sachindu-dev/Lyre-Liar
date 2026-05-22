@@ -53,11 +53,9 @@ func _add_player(id: String) -> void:
 	player.position = _spawn_points[_spawn_index % _spawn_points.size()]
 	_spawn_index += 1
 	add_child(player)
-	var cam: Camera2D = player.get_node("Camera2D")
-	cam.limit_left   = 0
-	cam.limit_top    = 0
-	cam.limit_right  = 1124
-	cam.limit_bottom = 4096
+	# Camera limits intentionally left at Godot's defaults (±10⁶) so
+	# the camera follows the player anywhere — including into the death pit
+	# — until the goal is reached.
 
 func _remove_player(id: String) -> void:
 	if has_node(id):

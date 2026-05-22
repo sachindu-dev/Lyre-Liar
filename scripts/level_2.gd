@@ -61,12 +61,9 @@ func _add_player(id: String) -> void:
 	_spawn_index += 1
 	add_child(player)
 
-	if player.is_local_player:
-		var cam: Camera2D = player.get_node("Camera2D")
-		cam.limit_left = 0
-		cam.limit_top = 0
-		cam.limit_right = int(world_size.x)
-		cam.limit_bottom = int(world_size.y)
+	# Camera limits intentionally left at Godot's defaults (±10⁶) so
+	# the camera follows the player anywhere — including into the death pit
+	# below world_size.y — until the goal is reached.
 
 
 func _remove_player(id: String) -> void:
