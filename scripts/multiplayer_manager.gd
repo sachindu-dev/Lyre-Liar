@@ -44,6 +44,7 @@ static func next_mode(current: String) -> String:
 			return MAP_REGISTRY[(i + 1) % MAP_REGISTRY.size()]["mode"]
 	return MAP_REGISTRY[0]["mode"]
 
+
 var active_players: Array[String] = []
 var session_id: String = ""
 var room_code: String = ""
