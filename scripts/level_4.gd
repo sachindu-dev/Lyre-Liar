@@ -5,8 +5,22 @@ var _spawn_points := [
 	Vector2(400, 152), Vector2(500, 152), Vector2(600, 152), Vector2(700, 152),
 ]
 var _spawn_index := 0
+var _death_menu: CanvasLayer = null
+var _level_complete_menu: CanvasLayer = null
+var _timer_hud: CanvasLayer = null
+var _run_time: float = 0.0
+var _deaths: int = 0
 
 func _ready() -> void:
+	add_child(preload("res://scenes/pause_menu.tscn").instantiate())
+	_death_menu = preload("res://scenes/death_menu.tscn").instantiate()
+	add_child(_death_menu)
+	_level_complete_menu = preload("res://scenes/level_complete_menu.tscn").instantiate()
+	add_child(_level_complete_menu)
+	_timer_hud = preload("res://scenes/timer_hud.tscn").instantiate()
+	add_child(_timer_hud)
+
+	$GoalZone.body_entered.connect(_on_goal_body_entered)
 	$KillZone.body_entered.connect(_on_kill_zone_body_entered)
 
 	MultiplayerManager.connection_failed.connect(_on_connection_failed)
@@ -39,19 +53,34 @@ func _add_player(id: String) -> void:
 	player.position = _spawn_points[_spawn_index % _spawn_points.size()]
 	_spawn_index += 1
 	add_child(player)
-	var cam: Camera2D = player.get_node("Camera2D")
-	cam.limit_left   = 0
-	cam.limit_top    = 0
-	cam.limit_right  = 1124
-	cam.limit_bottom = 4096
+	# Camera limits intentionally left at Godot's defaults (±10⁶) so
+	# the camera follows the player anywhere — including into the death pit
+	# — until the goal is reached.
 
 func _remove_player(id: String) -> void:
 	if has_node(id):
 		get_node(id).queue_free()
 
+func _process(delta: float) -> void:
+	if MultiplayerManager.is_single_player:
+		_run_time += delta
+
+
 func _on_kill_zone_body_entered(body: Node2D) -> void:
-	if body.has_method("respawn"):
-		body.respawn()
+	if not body.has_method("respawn"):
+		return
+	if "is_local_player" in body and body.is_local_player:
+		_deaths += 1
+		_death_menu.show_death(body)
+
+
+func _on_goal_body_entered(body: Node2D) -> void:
+	if _level_complete_menu == null:
+		return
+	if "is_local_player" in body and body.is_local_player:
+		if _timer_hud and _timer_hud.has_method("stop"):
+			_timer_hud.stop()
+		_level_complete_menu.show_win(body, _run_time, _deaths)
 
 func _display_room_code(custom_code: String = "") -> void:
 	var room_code := custom_code

@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cwpovsmkendrp" path="res://Assets/World/Assets/props/mushroom-brown.png" id="2_0etpo"]
 [ext_resource type="Texture2D" uid="uid://doorv8d7wgeh2" path="res://Assets/World/Assets/props/mushroom-red.png" id="3_lpec2"]
 [ext_resource type="Texture2D" uid="uid://ccierjag2o2ms" path="res://Assets/World/Assets/props/tree.png" id="4_20e5r"]
-[ext_resource type="AudioStream" uid="uid://d3r51omyx66bq" path="res://Assets/PinkMonster/Music/happywalking.ogg" id="4_gmwgb"]
+[ext_resource type="AudioStream" uid="uid://d3r51omyx66bq" path="res://Assets/Music/happywalking.ogg" id="4_gmwgb"]
 [ext_resource type="PackedScene" uid="uid://ql5s5dasaxm6" path="res://scenes/mobile_controls.tscn" id="4_mobile"]
 [ext_resource type="PackedScene" uid="uid://8dbsyumfmwut" path="res://Assets/PinkMonster/Enemies/Slug/Slug.tscn" id="5_o4885"]
 [ext_resource type="PackedScene" uid="uid://cjcyy51wg5x2y" path="res://Assets/PinkMonster/Enemies/Bee/bee.tscn" id="6_6l5e8"]
@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://cxm82d2p8ltj0" path="res://Assets/World/PixelFantasy_Caves_1/background3.png" id="16_cave3"]
 [ext_resource type="Texture2D" uid="uid://jolhuooitm6s" path="res://Assets/World/PixelFantasy_Caves_1/props1.png" id="20_s0ibv"]
 [ext_resource type="Texture2D" uid="uid://btait6wffvy68" path="res://Assets/World/PixelFantasy_Caves_1/props2.png" id="21_kqmrt"]
+[ext_resource type="PackedScene" path="res://scenes/goal_zone.tscn" id="22_goal"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_s0ibv"]
 
@@ -6009,6 +6010,9 @@ position = Vector2(1280, 3900)
 
 [node name="KillShape" type="CollisionShape2D" parent="KillZone" unique_id=1347778482]
 shape = SubResource("KillZoneShape")
+
+[node name="GoalZone" parent="." unique_id=1733855370 instance=ExtResource("22_goal")]
+position = Vector2(1022, 68)
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=693801169]
 stream = ExtResource("4_gmwgb")
