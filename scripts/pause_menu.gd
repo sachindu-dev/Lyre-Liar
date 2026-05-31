@@ -35,7 +35,9 @@ func _notification(what: int) -> void:
 func _toggle() -> void:
 	if _overlay.visible:
 		_resume()
-	else:
+	elif not get_tree().paused:
+		# Another overlay (death / level-complete / timeout) owns the pause —
+		# don't open over it, and never unpause something we didn't pause.
 		_open()
 
 

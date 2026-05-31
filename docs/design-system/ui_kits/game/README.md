@@ -24,17 +24,11 @@ Hi-fi recreation of the Lyre & Liar game client UI, modeled directly from the Go
 
 | File | Purpose |
 | --- | --- |
-| `App.jsx` | Root state machine — mirrors `main_menu.gd::_update_ui_state`. |
-| `GameFrame.jsx` | 360×640 portrait shell that scales to fit any viewport (mirrors `responsive_ui.gd`). |
-| `TitleBlock.jsx` | LYRE & LIAR wordmark + brass rules + tagline. |
-| `MenuButton.jsx` | Godot-default stylebox button with per-role label tint. |
-| `RoomCodeInput.jsx`, `ServerAddressInput.jsx` | The two `LineEdit`s from `main_menu.tscn`. |
-| `StatusLine.jsx` | Multiline status text in `state-status` green. |
+| `App.jsx` | Root state machine — mirrors `main_menu.gd::_update_ui_state`; owns screen/overlay state and the single-player countdown. |
+| `Primitives.jsx` | All small shared UI primitives — portrait shell, title block, buttons, the `LineEdit`s, and status line. |
 | `MainMenu.jsx` | Composes the three menu screens (initial / map-select / multiplayer). |
-| `GameView.jsx` | In-game canvas with parallax background, mobile controls, HUD. |
-| `MobileHUD.jsx` | Joystick + JUMP button + pause + timer. |
-| `Overlay.jsx` | Generic centered overlay frame; used by all four overlay screens. |
-| `OverlayPaused.jsx`, `OverlayDied.jsx`, `OverlayTimeout.jsx`, `OverlayComplete.jsx` | The four overlay states. |
+| `GameView.jsx` | In-game canvas with parallax background, mobile controls, and HUD (joystick + JUMP + pause + timer). |
+| `Overlays.jsx` | All four overlay states — Paused / Died / Timeout / Complete — on a shared centered frame. |
 
 ## Notes & limitations
 

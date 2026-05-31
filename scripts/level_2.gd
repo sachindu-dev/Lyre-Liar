@@ -86,7 +86,7 @@ func _spawn_positions() -> Array[Vector2]:
 		return positions
 	for child in holder.get_children():
 		if child is Node2D:
-			positions.append((child as Node2D).position)
+			positions.append((child as Node2D).global_position)
 	return positions
 
 

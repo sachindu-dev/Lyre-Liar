@@ -35,6 +35,7 @@ static func get_map(mode: String) -> Dictionary:
 	for entry in MAP_REGISTRY:
 		if entry["mode"] == mode:
 			return entry
+	push_error("get_map: unknown mode '%s'; falling back to '%s'" % [mode, MAP_REGISTRY[0]["mode"]])
 	return MAP_REGISTRY[0]
 
 
@@ -42,6 +43,7 @@ static func next_mode(current: String) -> String:
 	for i in MAP_REGISTRY.size():
 		if MAP_REGISTRY[i]["mode"] == current:
 			return MAP_REGISTRY[(i + 1) % MAP_REGISTRY.size()]["mode"]
+	push_error("next_mode: unknown mode '%s'; falling back to '%s'" % [current, MAP_REGISTRY[0]["mode"]])
 	return MAP_REGISTRY[0]["mode"]
 
 
